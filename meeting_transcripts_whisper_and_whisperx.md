@@ -105,9 +105,10 @@ whisperx meeting.wav \
   --compute_type int8 \
   --min_speakers 2 --max_speakers 8 \ # Adjust as needed
   --output_dir out \
-  --output_format vtt```
+  --output_format vtt
+```
 
-> **Note:** The first time you run this, WhisperX will download the Pyannote diarization model checkpoint (approximately 140 MB).
+**Note:** The first time you run this, WhisperX will download the Pyannote diarization model checkpoint (approximately 140 MB).
 
 **Result:**
 The output, including speaker labels, will be saved to `out/meeting.vtt`. It will look something like this:
