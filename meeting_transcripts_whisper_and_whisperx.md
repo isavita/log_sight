@@ -1,4 +1,3 @@
-````markdown
 # macOS Guide – Offline Meeting Transcripts with Whisper & WhisperX
 
 Need a fast transcript of your Zoom/Teams/Meet session?  
@@ -10,7 +9,7 @@ These steps show how to **convert video → clean WAV → text** on an Apple-Sil
 
 ```bash
 brew install ffmpeg
-````
+```
 
 ---
 

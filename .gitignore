@@ -4,6 +4,7 @@ data/
 # Jupyter Notebook
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+whisperx_env/
 
 # Python
 __pycache__/
