@@ -1,0 +1,84 @@
+# Untitled notebook
+
+```elixir
+Mix.install([
+  {:playwright, "~> 1.49.1-alpha.2"},
+])
+```
+
+## Make sure node and npx are available
+
+```elixir
+home = System.user_home!()
+asdf_shims =
+  System.get_env("ASDF_DATA_DIR") || Path.join([home, ".asdf", "shims"])
+
+new_path =
+  [System.get_env("PATH") || "", asdf_shims]
+  |> Enum.reject(&(&1 in [nil, ""]))
+  |> Enum.join(":")
+
+if String.contains?(System.get_env("PATH"), ".asdf/shims"), do: :ok, else: System.put_env("PATH", new_path)
+```
+
+```elixir
+base = Path.join(System.tmp_dir!(), "playwright-cache")
+File.mkdir_p!(base)
+
+if !System.get_env("PLAYWRIGHT_BROWSERS_PATH") do
+  System.put_env(%{
+    "PLAYWRIGHT_BROWSERS_PATH" => Path.join(base, "browsers"),
+    "XDG_CACHE_HOME" => Path.join(base, ".cache")
+  })
+end
+
+{System.get_env("PLAYWRIGHT_BROWSERS_PATH"), System.get_env("XDG_CACHE_HOME")}
+```
+
+```elixir
+home = System.user_home!()
+asdf_dir = System.get_env("ASDF_DIR") || Path.join(home, ".asdf")
+
+path =
+  Enum.join([
+    Path.join(asdf_dir, "bin"), 
+    Path.join(asdf_dir, "shims"),
+    System.get_env("PATH") || ""
+  ], ":")
+
+if !System.get_env("ASDF_DIR") do
+System.put_env(%{
+  "ASDF_DIR" => asdf_dir,
+  "PATH" => path
+})
+end
+
+# sanity checks
+{System.find_executable("asdf"),
+ System.find_executable("node"),
+ System.find_executable("npx")}
+
+```
+
+```elixir
+if !System.get_env("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD") do
+  Mix.Task.rerun("playwright.install")
+  System.put_env(%{
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD" => "1",
+  })
+end 
+```
+
+```elixir
+{:ok, browser} = Playwright.launch(:firefox)
+# {:ok, page}    = Playwright.Browser.new_page(browser)
+
+# :ok            = Playwright.Page.goto(page, "https://example.com")
+# IO.puts(Playwright.Page.title(page))
+
+# :ok            = Playwright.Browser.close(browser)
+```
+
+```elixir
+System.get_env("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD")
+```
