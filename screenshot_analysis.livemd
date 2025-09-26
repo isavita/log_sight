@@ -70,15 +70,70 @@ end
 ```
 
 ```elixir
-{:ok, browser} = Playwright.launch(:firefox)
-# {:ok, page}    = Playwright.Browser.new_page(browser)
+defmodule SimpleShot do
+  alias Playwright.{Browser, BrowserContext, Page}
 
-# :ok            = Playwright.Page.goto(page, "https://example.com")
-# IO.puts(Playwright.Page.title(page))
+  @doc """
+  Screenshot `url` to `out_path`.
 
-# :ok            = Playwright.Browser.close(browser)
+  Options:
+    * :full_page (boolean) – default true
+    * :viewport (map) – %{width: 1440, height: 900}
+  """
+  def run(url, out_path, opts \\ []) when is_binary(url) and is_binary(out_path) do
+    full_page = Keyword.get(opts, :full_page, true)
+    viewport  = Keyword.get(opts, :viewport, %{width: 1440, height: 900})
+
+    {:ok, browser} = Playwright.launch(:firefox)
+
+    try do
+      context = Browser.new_context(browser, %{viewport: viewport})
+      page    = BrowserContext.new_page(context)
+
+      _resp = Page.goto(page, url, %{wait_until: "load", timeout: 60_000})
+
+      png_b64 = Page.screenshot(page, %{full_page: full_page})
+      File.mkdir_p!(Path.dirname(out_path))
+      File.write!(out_path, Base.decode64!(png_b64))
+      {:ok, out_path}
+    after
+      :ok = Browser.close(browser)
+    end
+  end
+end
 ```
 
 ```elixir
-System.get_env("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD")
+SimpleShot.run("https://www.bbc.co.uk/news/articles/cp3q74v7gz7o", "/Users/dimova01/Desktop/test.png")
+```
+
+```elixir
+SimpleShot.run("https://www.bbc.co.uk/news/articles/cp3q74v7gz7o", "/Users/dimova01/Desktop/test1.png",
+               full_page: false, viewport: %{width: 1280, height: 800})
+```
+
+```elixir
+{:ok, browser} = Playwright.launch(:firefox)
+width = 1440
+height = 900
+p12 = "<PATH>"
+pass = ""
+url = ""
+context = Playwright.Browser.new_context(browser, %{
+    ignore_https_errors: true,
+    client_certificates: [
+      %{
+        origin: "https://pagemon.tools.bbc.co.uk/",
+        pfx_path: p12,
+        passphrase: pass
+      }
+    ],
+    viewport: %{width: 1440, height: 900}
+  })
+page = Playwright.BrowserContext.new_page(context)
+{:ok, state} = Playwright.Page.set_viewport_size(page, %{width: width, height: height})
+IO.puts(inspect(state))
+resp = Playwright.Page.goto(page, url)
+IO.inspect(resp)
+:ok = Playwright.Browser.close(browser)
 ```
